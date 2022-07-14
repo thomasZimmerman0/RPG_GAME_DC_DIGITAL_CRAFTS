@@ -4,42 +4,100 @@
 # 2. do nothing - in which case the goblin will attack him anyway
 # 3. flee
 
+#todo Add character select scenario
+
+import math
+import random
+import rpg_game.Character as Character
+
+class Scenario:
+    
+    def fight(self, pc, npc):
+        while pc.alive() and npc.alive():
+            print()
+            print("What do you want to do?")
+            print(f"1. fight {npc.name}")
+            print("2. do nothing")
+            print("3. flee")
+            print("> ", end=' ')
+            raw_input = input()
+            if raw_input == "1":
+                pc.attack(npc)
+                npc.attack(pc)
+                npc.print_status()
+                pc.print_status()
+            elif raw_input == "2":
+                npc.attack(pc)
+                pc.print_status()
+                npc.print_status()
+            elif raw_input == "3":
+                print("Goodbye.")
+                break
+            else:
+                print(f"Invalid input {raw_input}")
+        
+    
+class Hero(Character):
+    
+    is_hero = True
+    
+    def __init__(self):
+        super().__init__('Hero', 100, 5)
+
+    def critical(self):
+        self.power += self.power
+    
+class Goblin(Character):
+    
+    is_hero = False
+    
+    def __init__(self):
+        super().__init__('the goblin', 6, 3)
+
+class Zombie(Character):
+    
+    is_hero = False
+    
+    def __init__(self):
+        super().__init__('the zombie', math.inf, 4 )
+
+class Medic(Character):
+    
+    is_hero = False
+    
+    def __init__(self):
+        super().__init__('Medic', 30, 3)
+        
+    def heal(self):
+        self.health += 2
+
+class Shadow(Character):
+    
+    is_hero = False
+    
+    def __init__(self):
+        super().__init__('Shadow', 1, 5)
+ 
+
+         
+                
 def main():
-    hero_health = 10
-    hero_power = 5
-    goblin_health = 6
-    goblin_power = 2
 
-    while goblin_health > 0 and hero_health > 0:
-        print("You have {} health and {} power.".format(hero_health, hero_power))
-        print("The goblin has {} health and {} power.".format(goblin_health, goblin_power))
-        print()
-        print("What do you want to do?")
-        print("1. fight goblin")
-        print("2. do nothing")
-        print("3. flee")
-        print("> ", end=' ')
-        raw_input = input()
-        if raw_input == "1":
-            # Hero attacks goblin
-            goblin_health -= hero_power
-            print("You do {} damage to the goblin.".format(hero_power))
-            if goblin_health <= 0:
-                print("The goblin is dead.")
-        elif raw_input == "2":
-            pass
-        elif raw_input == "3":
-            print("Goodbye.")
-            break
-        else:
-            print("Invalid input {}".format(raw_input))
+    brawl = Scenario()
+    
+    
+    hero = Hero()
+    goblin = Goblin()
+    zombie = Zombie()
+    medic = Medic()
+    shadow = Shadow()
 
-        if goblin_health > 0:
-            # Goblin attacks hero
-            hero_health -= goblin_power
-            print("The goblin does {} damage to you.".format(goblin_power))
-            if hero_health <= 0:
-                print("You are dead.")
-
+    brawl.fight(hero, goblin)
+    brawl.fight(hero, zombie)
+    brawl.fight(hero, medic)
+    brawl.fight(hero, shadow)
+    
+    brawl.fight(medic, shadow)
+    
 main()
 
