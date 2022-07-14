@@ -5,6 +5,7 @@
 # 3. flee
 
 #todo Add character select scenario
+#lol
 
 import math
 import random
