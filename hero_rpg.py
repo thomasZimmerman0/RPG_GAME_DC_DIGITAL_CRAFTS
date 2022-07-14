@@ -7,9 +7,10 @@
 #todo Add character select scenario
 #lol
 
+
 import math
 import random
-import rpg_game.Character as Character
+import chara
 
 class Scenario:
     
@@ -19,86 +20,47 @@ class Scenario:
             print("What do you want to do?")
             print(f"1. fight {npc.name}")
             print("2. do nothing")
-            print("3. flee")
+            print("3. check bank")
+            print("4. Check status")
+            print("5. flee")
             print("> ", end=' ')
             raw_input = input()
             if raw_input == "1":
                 pc.attack(npc)
                 npc.attack(pc)
-                npc.print_status()
-                pc.print_status()
             elif raw_input == "2":
                 npc.attack(pc)
+            elif raw_input == "3":
+                print(f"{pc.bank}")
+            elif raw_input == "4":
                 pc.print_status()
                 npc.print_status()
-            elif raw_input == "3":
-                print("Goodbye.")
+            elif raw_input == '5':
+                print("Goodbye!")
                 break
             else:
                 print(f"Invalid input {raw_input}")
         
-    
-class Hero(Character):
-    
-    is_hero = True
-    
-    def __init__(self):
-        super().__init__('Hero', 100, 5)
-
-    def critical(self):
-        self.power += self.power
-    
-class Goblin(Character):
-    
-    is_hero = False
-    
-    def __init__(self):
-        super().__init__('the goblin', 6, 3)
-
-class Zombie(Character):
-    
-    is_hero = False
-    
-    def __init__(self):
-        super().__init__('the zombie', math.inf, 4 )
-
-class Medic(Character):
-    
-    is_hero = False
-    
-    def __init__(self):
-        super().__init__('Medic', 30, 3)
-        
-    def heal(self):
-        self.health += 2
-
-class Shadow(Character):
-    
-    is_hero = False
-    
-    def __init__(self):
-        super().__init__('Shadow', 1, 5)
- 
-
-         
                 
 def main():
 
     brawl = Scenario()
     
     
-    hero = Hero()
-    goblin = Goblin()
-    zombie = Zombie()
-    medic = Medic()
-    shadow = Shadow()
-
-    brawl.fight(hero, goblin)
-    brawl.fight(hero, zombie)
-    brawl.fight(hero, medic)
-    brawl.fight(hero, shadow)
-    
-    brawl.fight(medic, shadow)
+    hero = chara.Hero()
+    goblin = chara.Goblin()
+    zombie = chara.Zombie()
+    medic = chara.Medic()
+    shadow = chara.Shadow()
+    dweller = chara.Cave_Dweller()
+    dweller2 = chara.Cave_Dweller()
+    gaurdsman = chara.Temple_Gaurd()
+    # brawl.fight(hero, goblin)
+    # brawl.fight(hero, medic)
+    # brawl.fight(hero, shadow)
+    brawl.fight(hero, dweller)
+    brawl.fight(hero, gaurdsman)
+    brawl.fight(hero, dweller2)
     
 main()
 
