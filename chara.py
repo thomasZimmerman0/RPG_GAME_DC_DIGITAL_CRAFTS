@@ -6,12 +6,18 @@ class Character:
     
     chance_success = False
     
-    bank = 0
+    dam_ref = 0
     
-    def __init__(self, name, health, power):
+    bank = 9999
+    
+    item_list = []
+    
+    def __init__(self, name, health, power, armor_rating, evade):
         self.name = name
         self.health = health
         self.power = power
+        self.armor_rating = armor_rating
+        self.evade = evade
         
     
     #! Checks to see if the character is still alive
@@ -25,21 +31,22 @@ class Character:
     #! Prints health and power of the character
     def print_status(self):
         if self.is_hero == True:
-            print(f"You have {self.health} health and {self.power} power.")
+            print(f"Health:  {self.health}\nDamage:  {self.power}\nArmor:  {self.armor_rating}\nEvasion: {self.evade} ")
         elif self.is_hero == False:
             print(f"{self.name} has {self.health} health and {self.power} power.")
     
-    
+    ##################################################################################################################
+    ##################################################################################################################
     #! Takes in 2 characters and performs multiple calculations and prints accordingly 
     #? Character based calculations are performed and checked within this method
     def attack(self, defense):
         
-        self.rng(20) #calls for a 20% chance of success for hero's (the player's) critical hit
         orig_power = self.power #holds original value for power for player and npc's
         
         
-        
+        self.rng(self.evade * 5)#calls for a 20% chance of success for hero's (the player's) critical hit
         if self.chance_success == True and isinstance(self, Hero): #Will currently only work on Hero character
+            print("Critical hit!")
             self.critical() #Temporarily double's hero's damage if successful
         
         if isinstance(defense, Shadow): 
@@ -58,15 +65,25 @@ class Character:
             if self.chance_success == True:
                 print(f"Gaurdsman striked with force!")
                 self.heavy()
-            
-            
-            
-        defense.health -= self.power #! Health diminishment calculation! All damage mutlipliers should be done before this line!
         
-        
+        #! Health diminishment calculation! All damage mutlipliers should be done before this block!
+        #!#########################################################################################
+        self.rng(defense.evade * 5)
+        if self.chance_success == True:
+            if self.is_hero == True:
+                print(f"{defense.name} slipped your attack!")
+            elif self.is_hero == False:
+                print(f"You evaded {self.name}'s attack!")
+            self.chance_success = False
+            self.dam_ref = 0
+        else:
+            defense.health = defense.health - (self.power - defense.armor_rating)
+            self.dam_ref = (self.power - defense.armor_rating)
+        #!#########################################################################################
+        #!#########################################################################################
         
         if self.is_hero == True: #Runs if it is the player character attacking
-            print(f"You do {self.power} damage to {defense.name}.")
+            print(f"You do {self.dam_ref} damage to {defense.name}.")
             self.power = orig_power #Resets multiplier if it was successful
             
             
@@ -80,7 +97,7 @@ class Character:
 
                 
         elif self.is_hero == False and self.alive(): #Runs when npc attacks player character
-            print(f"{self.name} does {self.power} damage to {defense.name}.")
+            print(f"{self.name} does {self.dam_ref} damage to you.")
             if isinstance(self, Cave_Dweller):
                 self.power = orig_power #Resets cave dweller ability bonus.
             if isinstance(self, Temple_Gaurd):
@@ -88,10 +105,15 @@ class Character:
             if defense.alive() == False:
                 print("You are dead.")
                 
-        if defense.alive() == False:
+        if defense.alive() == False: #This if block will contain if statemtns pertaining to unique drops
             print(f"{defense.name} is dead.")
             print(f"You got {self.bounty(defense)} gold!")
-    
+            if isinstance(defense, Medic): #Checks if the enemy type was Medic, prints Medic's special drop
+                print(f"The medic dropped 1 SuperTonic!") 
+            
+            
+    ##################################################################################################################
+    ##################################################################################################################
     #! Random number generator used to determine if a probability based attack / defense will succeed
     def rng(self, chance):
         number = random.randrange(1, 100)
@@ -109,6 +131,7 @@ class Character:
             reward = 5
         elif isinstance(type, Medic ):
             reward = 7
+            self.item_list.append('SuperTonic')
         elif isinstance(type, Shadow):
             reward = 20
         elif isinstance(type, Cave_Dweller):
@@ -119,16 +142,27 @@ class Character:
         self.bank += reward
         
         return reward
+
+    #! Returns quantity of a specific item 
+    def itemQuant (self, item):
+        
+        quantity = 0
+        
+        for i in self.item_list:
+            if i == item:
+                quantity += 1
+        return quantity
             
     
-        
+##################################################################################################################
+##################################################################################################################
     
 class Hero(Character):
     
     is_hero = True
     
     def __init__(self):
-        super().__init__('Hero', 1000, 5)
+        super().__init__('Hero', 100, 5, 0, 0)
 
     def critical(self):
         self.power += self.power
@@ -138,21 +172,21 @@ class Goblin(Character):
     is_hero = False
     
     def __init__(self):
-        super().__init__('the goblin', 6, 3)
+        super().__init__('the goblin', 6, 3, 0)
 
 class Zombie(Character):
     
     is_hero = False
     
     def __init__(self):
-        super().__init__('the zombie', math.inf, 4 )
+        super().__init__('the zombie', math.inf, 4, 0 )
 
 class Medic(Character):
     
     is_hero = False
     
     def __init__(self):
-        super().__init__('Medic', 30, 3)
+        super().__init__('Medic', 30, 3, 1)
         
     def heal(self):
         self.health += 5
@@ -162,14 +196,14 @@ class Shadow(Character):
     is_hero = False
     
     def __init__(self):
-        super().__init__('Shadow', 1, 5)
+        super().__init__('Shadow', 1, 5, 0)
 
 class Cave_Dweller(Character):
 
     is_hero = False
     
     def __init__(self):
-        super().__init__('the cave dweller', 20, 6)
+        super().__init__('the cave dweller', 20, 6, 2, 2)
     
     def berzerk(self):
         self.health += 3
@@ -180,7 +214,7 @@ class Temple_Gaurd(Character):
     is_hero = False
     
     def __init__(self):
-        super().__init__('Temple Gaurd', 30, 7)
+        super().__init__('Temple Gaurd', 30, 7, 4)
     
     def heavy(self):
         self.power *= 2
