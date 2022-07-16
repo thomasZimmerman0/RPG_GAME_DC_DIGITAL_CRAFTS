@@ -1,5 +1,6 @@
 import random
 import math
+import items
 
 class Character:
     
@@ -11,6 +12,7 @@ class Character:
     bank = 9999
     
     item_list = []
+    
     
     def __init__(self, name, health, power, armor_rating, evade):
         self.name = name
@@ -43,7 +45,17 @@ class Character:
     #? Character based calculations are performed and checked within this method
     def attack(self, defense):
         
+        giant_calc = False
         
+        you_missed_text = {
+            1: f"{defense.name} slipped your attack!",
+            2: f"You failed to notice {defense.name}'s maneuver!", 
+            3: f"{defense.name} parries adroitly!" }
+        
+        attacker_missed_text = {
+            1:f"You evaded {self.name}'s attack!",
+            2:f"You duck your head in the nick of time!",
+            3:f"{self.name} fumbles his strike, and misses fantastically!"}
         orig_power = self.power #holds original value for power for player and npc's
         
         
@@ -66,25 +78,38 @@ class Character:
         if isinstance(self, Temple_Gaurd):
             self.rng(50)
             if self.chance_success == True:
-                print(f"Gaurdsman striked with force!")
+                print(f"Gaurdsman winds up and swings down with heavy force!")
                 self.heavy()
         
         #! Health diminishment calculation! All damage mutlipliers should be done before this block!
         #!#########################################################################################
+        
+        if isinstance(self, Giant):
+            self.rng(25)
+            giant_calc = self.chance_success
+        
         if self.evade > 4: #Ensures evasion can not exceed 20%
             self.evade == 4
             
+            
         self.rng(defense.evade * 5) #Calculates defense's evasion score for a chance to miss the attack
-        if self.chance_success == True:
+        
+        if self.chance_success == True: 
             if self.is_hero == True:
-                print(f"{defense.name} slipped your attack!")
+                print(you_missed_text[random.randrange(1, 3)])
             elif self.is_hero == False:
-                print(f"You evaded {self.name}'s attack!")
+                print(attacker_missed_text[random.randrange(1, 3)])
             self.chance_success = False
             self.dam_ref = 0
+        elif giant_calc == True:
+               print("The Giant could not keep track of your speed!")
+               self.dam_ref = 0
         else: # When evasion is unsuccessful, simmply calculate damage done
-            defense.health = defense.health - (self.power - defense.armor_rating)
-            self.dam_ref = (self.power - defense.armor_rating)
+            damage = self.power - defense.armor_rating
+            if damage < 1:
+                damage = 1
+            defense.health -= damage
+            self.dam_ref = damage
         #!#########################################################################################
         #!#########################################################################################
         
@@ -109,11 +134,14 @@ class Character:
             if defense.alive() == False:
                 print("You are dead.")
                 
-        if self.is_hero == False and defense.alive() == False: #This if block will contain if statemtns pertaining to unique drops
-            print(f"{defense.name} is dead.")
-            print(f"You got {self.bounty(defense)} gold!")
-            if isinstance(defense, Medic): #Checks if the enemy type was Medic, prints Medic's special drop
+        if self.is_hero == False and self.alive() == False: #This if block will contain if statemtns pertaining to unique drops
+            print(f"{self.name} is dead.")
+            print(f"You got {self.bounty(self)} gold!")
+            if isinstance(self, Medic): #Checks if the enemy type was Medic, prints Medic's special drop
                 print(f"The medic dropped 1 SuperTonic!") 
+        
+        if isinstance(self, Giant):
+            print("The Giant Roars...")
             
             
     ##################################################################################################################
@@ -156,6 +184,9 @@ class Character:
             if i == item:
                 quantity += 1
         return quantity
+    
+
+            
             
     
 ##################################################################################################################
@@ -176,7 +207,7 @@ class Goblin(Character):
     is_hero = False
     
     def __init__(self):
-        super().__init__('the goblin', 6, 3, 0)
+        super().__init__('the goblin', 6, 3, 0, 1)
 
 class Zombie(Character):
     
@@ -218,8 +249,16 @@ class Temple_Gaurd(Character):
     is_hero = False
     
     def __init__(self):
-        super().__init__('Temple Gaurd', 30, 7, 4)
+        super().__init__('Royal Gaurdsman', 30, 7, 4, 3)
     
     def heavy(self):
         self.power *= 2
- 
+
+class Giant(Character):
+    
+    is_hero = False
+    
+    def __init__(self):
+        super().__init__('Giant Mutant', 100, 15, 0, 0)
+    
+    

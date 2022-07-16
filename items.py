@@ -4,57 +4,149 @@ class Items:
 
     def __init__(self, name):
         self.name = name
+    
+    def use_item(self, pc, npc):
+        for i in pc.item_list:
+            if isinstance(self, Swap):
+                self.bonus(pc, npc)
+                pc.item_list.remove(self.name)
+            else:
+                self.bonus(pc)
+                pc.item_list.remove(self.name)
+            break
+            
+
+class SuperTonic(Items):
+    def __init__(self):
+        super().__init__('SuperTonic')
+    
+    def bonus(self, pc):
+        pc.health += 10
         
-    def SuperTonic(self, pc):
-        for i in pc.item_list:
-            if i == 'SuperTonic':
-                pc.health += 10
-                pc.item_list.remove('SuperTonic')
-                break
-                
-    def Armor(self, pc):
-        for i in pc.item_list:
-            if i == 'Old Leather Pads':
-                pc.armor_rating += 2
-                pc.item_list.remove('Old Leather Pads')
-                break
-
-    def Evade (self, pc):
-        for i in pc.item_list:
-            if i == 'Rune of Evasion':
-                pc.evade += 2
-                pc.item_list.remove('Rune of Evasion')
-                break
-            
-    def Root (self, pc):
-        for i in pc.item_list:
-            if i == 'Root of the Mutant Tree':
-                pc.power += 2
-                pc.item_list.remove('Root of the Mutant Tree')
-                break
-            
-    def Remove_Root(self, pc):
+class Armorlv1(Items):
+    
+    
+    
+    def __init__(self):
+        super().__init__('Old Leather Pads')
+        
+        
+    def bonus(self, pc):
+        pc.armor_rating += 2
+        
+    def remove(self, pc):
+        pc.armor_rating -= 2
+        
+        
+class Armorlv2(Items):
+    
+    
+    
+    def __init__(self):
+        super().__init__('Used Chainmail Garb')
+        
+        
+    def bonus(self, pc):
+        pc.armor_rating += 5
+        
+    def remove(self, pc):
+        pc.armor_rating -= 5
+        
+        
+class Armorlv3(Items):
+    
+    
+    
+    def __init__(self):
+        super().__init__('New Mastercrafted Knights Suit of Armor')
+        
+        
+    def bonus(self, pc):
+        pc.armor_rating += 10
+        
+    def remove(self, pc):
+        pc.armor_rating -= 10
+        
+        
+class Evade(Items):
+    def __init__(self):
+        super().__init__('Rune of Evasion')
+        
+    def bonus(self, pc):
+        pc.evade += 1
+        
+class Root(Items):
+    def __init__(self):
+        super().__init__('Root of the Mutant Tree')
+        
+    def bonus(self, pc):
+        pc.power += 2
+    
+    def remove_root(self, pc):
         pc.power -= 2
-    
-    def Swap(self, pc, npc):
+        
+class Swap(Items):
+    def __init__(self):
+        super().__init__('Scroll of Reversal')
+        
+    def bonus(self, pc, npc):
         hold = pc.power
-        for i in pc.item_list:
-            if i == 'Scroll of Reversal':
-                pc.power = npc.power
-                npc.power = hold
-                pc.item_list.remove('Scroll of Reversal')
-                break
+        pc.power = npc.power
+        npc.power = hold
+        
+class Swordlv1(Items):
     
-    def Dull_Sabre(self, pc):
-        for i in pc.item_list:
-            if i == 'Dull Sabre':
-                pc.power += 3
-                pc.item_list.remove('Dull Sabre')
-                break
-            
-    def Remove_Dull_Sabre(self, pc):
+    
+    
+    def __init__(self):
+        super().__init__('Dull Sabre')
+        
+        
+    def bonus(self, pc):
+        pc.power += 3
+    
+    def remove(self, pc):
         pc.power -= 3
-
+        
+        
+class Swordlv2(Items):
+    
+    
+    
+    def __init__(self):
+        super().__init__('Knight\'s Longsword')
+        
+        
+    def bonus(self, pc):
+        pc.power += 5
+    
+    def remove(self, pc):
+        pc.power -= 5
+        
+        
+class Swordlv3(Items):
+    
+    
+    
+    def __init__(self):
+        super().__init__('Arch Bishop Igor\'s Legnedary Diamond Encrusted Two-handed Great Sword')
+        
+        
+    def bonus(self, pc):
+        pc.power += 8
+    
+    def remove(self, pc):
+        pc.power -= 8
+        
+        
+class Volatile_Powder(Items):
+    def __init__(self, used):
+        super().__init__('Volatile Powder')
+        self.used = used
+    
+    def bonus(self, pc):
+        self.used = True
+        
                 
             
         
