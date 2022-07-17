@@ -8,9 +8,21 @@ class Character:
     
     dam_ref = 0
     
-    bank = 9999
+    bank = 900
     
     item_list = []
+    
+    #? The variables below this line are for holding the values of an npc so that 
+    #? When they run out of HP their character object can be used again at full health
+    #? (The other values are also being reset just in case anything funny happens with
+    #? item usage, abilites etc that may change the value if they die while being buffed
+    #? or debuffed)
+    
+    HP = 0
+    ST = 0
+    AP = 0
+    EV = 0
+    
     
     
     def __init__(self, name, health, power, armor_rating, evade):
@@ -33,10 +45,9 @@ class Character:
         
     #! Prints health and power of the character
     def print_status(self):
-        if self.is_hero == True:
-            print(f"Health:  {self.health}\nDamage:  {self.power}\nArmor:  {self.armor_rating}\nEvasion: {self.evade} ")
-        elif self.is_hero == False:
-            print(f"{self.name} has {self.health} health and {self.power} power.")
+
+        print(f"Health:  {self.health}\nDamage:  {self.power}\nArmor:  {self.armor_rating}\nEvasion: {self.evade} \n")
+
     
     ##################################################################################################################
     ##################################################################################################################
@@ -65,15 +76,10 @@ class Character:
             print("Heroic Swing!")
             self.critical() #Temporarily double's hero's damage if successful
         self.rng(25)
-        if self.chance_success == True and isinstance (self, Hero):
+        if self.chance_success == True and isinstance (self, Assassian):
             print("Devilish Plunge!")
             self.critical()
             
-        
-        if isinstance(defense, Shadow): 
-            defense.rng(10)
-            if defense.chance_success == False:
-                self.power = 0
         
         if isinstance(self, Cave_Dweller):
             self.rng(20)
@@ -106,10 +112,10 @@ class Character:
         self.rng(defense.evade * 5) #Calculates defense's evasion score for a chance to miss the attack
         
         if self.chance_success == True: 
-            if self.is_hero == True:
-                print(you_missed_text[random.randrange(1, 3)])
-            elif self.is_hero == False:
-                print(attacker_missed_text[random.randrange(1, 3)])
+            if self.is_hero == True and defense.alive() == True:
+                print(you_missed_text[random.randrange(1, 4)])
+            elif self.is_hero == False and self.alive():
+                print(attacker_missed_text[random.randrange(1, 4)])
             self.chance_success = False
             self.dam_ref = 0
         elif giant_calc == True:
@@ -167,7 +173,7 @@ class Character:
     ##################################################################################################################
     #! Random number generator used to determine if a probability based attack / defense will succeed
     def rng(self, chance):
-        number = random.randrange(1, 100)
+        number = random.randrange(1, 101)
         if number <= chance:
             self.chance_success = True
         else: 
@@ -179,7 +185,11 @@ class Character:
         reward = 0
         
         if isinstance(type, Goblin):
-            reward = 5
+            reward = 4
+            self.rng(15)
+            if self.chance_success == True:
+                self.item_list.append('SuperTonic')
+                print("\nThe goblin dropped a SuperTonic!")
         elif isinstance(type, Medic ):
             reward = 7
             self.item_list.append('SuperTonic')
@@ -187,8 +197,16 @@ class Character:
             reward = 20
         elif isinstance(type, Cave_Dweller):
             reward = 10
+            self.rng(15)
+            if self.chance_success == True:
+                self.item_list.append('SuperTonic')
+                print("\n The Cave Dweller dropped a SuperTonic!")
+            self.rng(15)
+            if self.chance_success == True:
+                self.item_list.append('Root of the Mutant Tree')
+                print("\n The Cave Dweller dropped a strange root!")
         elif isinstance(type, Temple_Gaurd):
-            reward = 14
+            reward = 25
         elif isinstance(type, Giant):
             reward = 100
             
@@ -206,6 +224,18 @@ class Character:
                 quantity += 1
         return quantity
     
+    def hold_values (self):
+        self.HP = self.health
+        self.ST = self.power
+        self.AP = self.armor_rating
+        self.EV = self.evade
+    
+    def reset (self):
+        self.health = self.HP
+        self.poewr = self.ST
+        self.armor_rating = self.AP
+        self.evade = self.EV
+        
 
             
             
@@ -252,17 +282,17 @@ class Shadow(Character):
     is_hero = False
     
     def __init__(self):
-        super().__init__('Shadow', 1, 5, 0, 0)
+        super().__init__('Shadow', 1, 5, 0, 18)
 
 class Cave_Dweller(Character):
 
     is_hero = False
     
     def __init__(self):
-        super().__init__('the cave dweller', 20, 6, 2, 2)
+        super().__init__('the cave dweller', 14, 4, 1, 2)
     
     def berzerk(self):
-        self.health += 3
+        self.health += 2
         self.power += 3
 
 class Temple_Gaurd(Character):
