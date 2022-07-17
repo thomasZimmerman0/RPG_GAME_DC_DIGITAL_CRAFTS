@@ -1,4 +1,4 @@
-
+import chara
 
 class Items:
 
@@ -21,7 +21,25 @@ class SuperTonic(Items):
         super().__init__('SuperTonic')
     
     def bonus(self, pc):
-        pc.health += 10
+        if pc.health < 45 and isinstance(pc, chara.Hero):
+            if pc.health > 35:
+                pc.health = 45
+            else:
+                pc.health += 10
+                
+        if pc.health < 55 and isinstance(pc, chara.Medic):
+            if pc.health > 45:
+                pc.health = 55
+            else:
+                pc.health += 10
+                
+        if pc.health <= 35 and isinstance(pc, chara.Assassian):
+            if pc.health > 25:
+                pc.health = 35
+            else:
+                pc.health += 10
+            
+        
         
 class Armorlv1(Items):
     

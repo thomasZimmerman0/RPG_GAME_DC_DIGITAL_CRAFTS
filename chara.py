@@ -1,6 +1,5 @@
 import random
 import math
-import items
 
 class Character:
     
@@ -47,6 +46,7 @@ class Character:
         
         giant_calc = False
         
+        
         you_missed_text = {
             1: f"{defense.name} slipped your attack!",
             2: f"You failed to notice {defense.name}'s maneuver!", 
@@ -56,13 +56,19 @@ class Character:
             1:f"You evaded {self.name}'s attack!",
             2:f"You duck your head in the nick of time!",
             3:f"{self.name} fumbles his strike, and misses fantastically!"}
+        
         orig_power = self.power #holds original value for power for player and npc's
         
         
         self.rng(20)#calls for a 20% chance of success for hero's (the player's) critical hit
         if self.chance_success == True and isinstance(self, Hero): #Will currently only work on Hero character
-            print("Critical hit!")
+            print("Heroic Swing!")
             self.critical() #Temporarily double's hero's damage if successful
+        self.rng(25)
+        if self.chance_success == True and isinstance (self, Hero):
+            print("Devilish Plunge!")
+            self.critical()
+            
         
         if isinstance(defense, Shadow): 
             defense.rng(10)
@@ -88,7 +94,12 @@ class Character:
             self.rng(25)
             giant_calc = self.chance_success
         
-        if self.evade > 4: #Ensures evasion can not exceed 20%
+        if isinstance(self, Wizard):
+            self.rng(15)
+            if self.chance_success == True:
+                self.enchant()
+        
+        if self.evade > 4 and isinstance(self, Assassian) == False: #Ensures evasion can not exceed 20%
             self.evade == 4
             
             
@@ -121,8 +132,16 @@ class Character:
             if isinstance(defense, Medic):                #Performs Medics special ability 
                 defense.rng(20)                           #for a chance to heal after being 
                 if defense.chance_success == True and defense.alive():        #attacked by the player
-                    defense.health += 2
+                    defense.heal()
                     print(f"{defense.name} healed!")
+            
+            if isinstance(defense, Wizard):                #Performs Wizards special ability 
+                defense.rng(15)                           #for a chance to heal after being 
+                if defense.chance_success == True and defense.alive():  
+                    defense.heal()
+                    
+            
+            
                     
                 
         elif self.is_hero == False and self.alive(): #Runs when npc attacks player character
@@ -167,9 +186,11 @@ class Character:
         elif isinstance(type, Shadow):
             reward = 20
         elif isinstance(type, Cave_Dweller):
-            reward = 8
+            reward = 10
         elif isinstance(type, Temple_Gaurd):
             reward = 14
+        elif isinstance(type, Giant):
+            reward = 100
             
         self.bank += reward
         
@@ -197,7 +218,7 @@ class Hero(Character):
     is_hero = False
     
     def __init__(self):
-        super().__init__('Hero', 100, 5, 0, 0)
+        super().__init__('Hero', 25, 4, 1, 0)
 
     def critical(self):
         self.power += self.power
@@ -221,10 +242,10 @@ class Medic(Character):
     is_hero = False
     
     def __init__(self):
-        super().__init__('Medic', 30, 5, 4, 4)
+        super().__init__('Medic', 25, 2, 0, 0)
         
     def heal(self):
-        self.health += 5
+        self.health += 6
 
 class Shadow(Character):
     
@@ -238,7 +259,7 @@ class Cave_Dweller(Character):
     is_hero = False
     
     def __init__(self):
-        super().__init__('the cave dweller', 50, 6, 2, 2)
+        super().__init__('the cave dweller', 20, 6, 2, 2)
     
     def berzerk(self):
         self.health += 3
@@ -249,7 +270,7 @@ class Temple_Gaurd(Character):
     is_hero = False
     
     def __init__(self):
-        super().__init__('Royal Gaurdsman', 30, 7, 4, 3)
+        super().__init__('Royal Gaurdsman', 30, 10, 4, 3)
     
     def heavy(self):
         self.power *= 2
@@ -260,5 +281,35 @@ class Giant(Character):
     
     def __init__(self):
         super().__init__('Giant Mutant', 100, 15, 0, 0)
+
+class Assassian(Character):
+    
+    is_hero = False
+    
+    def __init__(self):
+        super().__init__('Assassian', 15, 4, 0, 3)
+    
+    def critical(self):
+        self.power += (self.power * 0.5)
+
+class Wizard(Character):
+    
+    is_hero = False
+    
+    used_enchant  = False
+    
+    def __init__(self):
+        super().__init__('The Wizard', 30, 12, 4, 3)
+    
+    def heal(self):
+            print("The wizard casts a restorative spell!")
+            self.health += 5
+        
+    def enchant(self):
+            print("The wizard enchants his weapon with electricity!")
+            self.power += 4
+            self.used_enchant = True
+
+
     
     
